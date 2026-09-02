@@ -37,14 +37,14 @@ Config.HygieneSystem = {
     initialCleanliness = 80,
     maxCleanliness = 100,
     minCleanliness = 0,
-    
+
     naturalDecay = {
         enabled = true,
         rate = 0.5,        -- Pérdida de higiene por intervalo
         interval = 60000   -- Cada 1 minuto
     },
-    
-    -- Se corrigió para que el servidor pueda leerlo de manera descendente limpia
+
+    -- Umbrales y efectos (mantenidos)
     lowHygieneEffects = {
         [40] = { 
             message = "🤢 Te estás poniendo sucio...",
@@ -61,14 +61,32 @@ Config.HygieneSystem = {
             healthEffect = 10,
             diseaseChance = 0.15 -- 15% de probabilidad
         }
-    }
+    },
+
+    -- ------------------------------------------------------------------
+    -- Tunables para reacciones de NPC y efectos de olor (governability)
+    -- ------------------------------------------------------------------
+    NPCCheckInterval = 1000,           -- ms entre checks de NPC / PTFX
+    NPCReactThreshold = 20,            -- higiene (%) por debajo de la cual reaccionan NPCs
+    NPCReactDistance = 5.0,            -- distancia en metros para reaccionar
+    NPCReactCooldownMs = 5000,         -- cooldown por NPC en ms
+    NPCMaxReactPerTick = 6,            -- máximo NPCs a hacer reaccionar por tick
+
+    -- PTFX de olor (moscas) y umbral
+    SmellPtfx = {
+        dict = 'core',
+        name = 'ent_amb_flies',
+        offset = vector3(0.0, 0.0, 0.5),
+        scale = 1.0
+    },
+    SmellThreshold = 10,               -- higiene (%) por debajo de la cual aparecen moscas
+    NPCCheckDistanceSqLock = true      -- dejar true usa squared distance optimizada
 }
 
 -- [[ EFECTOS DE ACCIONES ]] -------------------------------------------
--- Balanceado matemáticamente para que sumen/resten de acuerdo a la lógica corregida del Server
 Config.Effects = {
     toilet = {
-        hunger_reduction = 0,   -- No da comida ir al baño
+        hunger_reduction = 0,
         thirst_reduction = 0,
         cleanliness_gain = 5,
         bladder_relief = 100, 
@@ -114,7 +132,7 @@ Config.Actions = {
     },
     urinal = {
         isScenario = false,
-        animDict = 'amb@world_human_peeing@male@base', -- Animación real de orinar de GTA V
+        animDict = 'amb@world_human_peeing@male@base',
         animName = 'base',
         duration = 8000,
         text = '🚹 Usando orinal...',
@@ -127,7 +145,7 @@ Config.Actions = {
     },
     shower = {
         isScenario = false,
-        animDict = 'mp_safehouseshower@male@', -- Animación real y nativa dentro de una ducha
+        animDict = 'mp_safehouseshower@male@',
         animName = 'action_a',
         duration = 15000, 
         text = '🚿 Tomando una ducha...',
@@ -146,7 +164,7 @@ Config.Actions = {
     },
     sink = {
         isScenario = false,
-        animDict = 'amb@world_human_wash_hands@male@base', -- Diccionario real de lavado de manos
+        animDict = 'amb@world_human_wash_hands@male@base',
         animName = 'base',
         duration = 6000,
         text = '🚰 Lavándose las manos...',
@@ -181,10 +199,8 @@ Config.DiseaseSystem = {
     }
 }
 
--- [[ UBICACIONES INTERACTIVAS CORREGIDAS (STRINGS) ]] -----------------
--- Quitados los GetHashKey() directos para evitar colapsos al iniciar el recurso
+-- [[ UBICACIONES INTERACTIVAS CORREGIDAS ]] -------------------------
 Config.Locations = {
-    -- Baños Públicos Legion Square / Entornos
     {
         coords = vector3(-1261.21, -1438.30, 4.40), 
         heading = 24.0,                            
@@ -206,8 +222,6 @@ Config.Locations = {
         objectModel = 'prop_toilet_01',
         isPublic = true
     },
-    
-    -- Duchas
     {
         coords = vector3(-1147.20, -685.20, 35.70), 
         heading = 330.0,
@@ -222,8 +236,6 @@ Config.Locations = {
         objectModel = 'prop_shower_01',
         isPublic = true
     },
-    
-    -- Lavabos
     {
         coords = vector3(264.80, -1004.80, -100.00), 
         heading = 30.0,
@@ -242,10 +254,10 @@ Config.Locations = {
 
 -- [[ CONFIGURACIÓN DE COOLDOWNS ]] -----------------------------------
 Config.Cooldowns = {
-    toilet = 180, 
-    urinal = 120, 
-    shower = 300, 
-    sink = 60     
+    toilet = 180,
+    urinal = 120,
+    shower = 300,
+    sink = 60
 }
 
-print('[ESX_BATHROOM] Configuración verificada y cargada sin nativos pre-procesados.')
+print('[ESX_BATHROOM] Configuración verificada y cargada con tunables para higiene/NPCs/PTFX.')
