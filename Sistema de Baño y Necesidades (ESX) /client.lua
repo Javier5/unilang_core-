@@ -9,6 +9,7 @@ local isActionInProgress = false
 local isNearObject = false 
 local currentZone = nil     
 local ptfxHandle = 0
+local smellPtfxHandle = 0
 local needsUpdateTimer = 0
 
 local playerNeeds = {
@@ -376,12 +377,13 @@ end)
 AddEventHandler('onResourceStop', function(resourceName)
     if resourceName == GetCurrentResourceName() then
         if ptfxHandle ~= 0 then StopParticleFxLooped(ptfxHandle, false) end
+        if smellPtfxHandle ~= 0 then StopParticleFxLooped(smellPtfxHandle, false) end
         ClearPedTasksImmediately(PlayerPedId())
         FreezeEntityPosition(PlayerPedId(), false)
     end
 end)
 
--- [[ DETECTOR DE DAÑO Y SANGRAO ]] ----------------------------------
+-- [[ DETECTOR DE DAÑO Y SANGRADO ]] ----------------------------------
 Citizen.CreateThread(function()
     local lastHealth = GetEntityHealth(PlayerPedId())
     
@@ -408,6 +410,7 @@ Citizen.CreateThread(function()
         lastHealth = currentHealth
     end
 end)
+
 -- [[ EFECTO VISUAL DE SANGRE ]] -------------------------------------
 Citizen.CreateThread(function()
     while true do
@@ -417,10 +420,9 @@ Citizen.CreateThread(function()
         -- (Lo implementaremos en la siguiente fase de partículas)
     end
 end)
+
 -- [[ SISTEMA SOCIAL: REACCIÓN DE NPCS Y EFECTOS VISUALES ]] ----------------
 Citizen.CreateThread(function()
-    local ptfxHandle = nil
-
     while true do
         Citizen.Wait(1000) -- Hilo optimizado
         local playerPed = PlayerPedId()
@@ -429,16 +431,16 @@ Citizen.CreateThread(function()
 
         -- 1. LÓGICA DE PARTÍCULAS (Moscas si higiene < 10%)
         if hygiene < 10 then
-            if not ptfxHandle then
+            if smellPtfxHandle == 0 then
                 RequestNamedPtfxAsset("core")
                 while not HasNamedPtfxAssetLoaded("core") do Citizen.Wait(0) end
                 UseParticleFxAssetNextCall("core")
-                ptfxHandle = StartParticleFxLoopedOnEntity("ent_amb_flies", playerPed, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 1.0, false, false, false)
+                smellPtfxHandle = StartParticleFxLoopedOnEntity("ent_amb_flies", playerPed, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 1.0, false, false, false)
             end
         else
-            if ptfxHandle then
-                StopParticleFxLooped(ptfxHandle, 0)
-                ptfxHandle = nil
+            if smellPtfxHandle ~= 0 then
+                StopParticleFxLooped(smellPtfxHandle, 0)
+                smellPtfxHandle = 0
             end
         end
 
